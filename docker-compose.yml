@@ -1,0 +1,84 @@
+services:
+  postgres:
+    image: postgres:13
+    container_name: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./init:/docker-entrypoint-initdb.d
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - sales_network
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    ports:
+      - "8080:80"
+    networks:
+      - sales_network
+    depends_on:
+      - postgres
+
+  metabase:
+    image: metabase/metabase
+    container_name: metabase
+    ports:
+      - "3000:3000"
+    networks:
+      - sales_network
+    depends_on:
+      - postgres
+
+  superset:
+    image: apache/superset
+    container_name: superset
+    environment:
+      SUPERSET_SECRET_KEY: ${SUPERSET_SECRET_KEY}
+      SUPERSET_USER_NAME: ${SUPERSET_USER_NAME}
+      SUPERSET_USER_PASSWORD: ${SUPERSET_USER_PASSWORD}
+      SUPERSET_LOAD_EXAMPLES: "yes"
+    ports:
+      - "8088:8088"
+    volumes:
+      - ./superset/superset_config.py:/app/pythonpath/superset_config.py  # Montez le fichier de configuration ici
+      - ./superset/init_superset.py:/app/init_superset.py
+    command: >
+      sh -c "
+      superset db upgrade &&
+      superset init &&
+      python /app/init_superset.py &&
+      gunicorn --bind 0.0.0.0:8088 --workers 2 'superset.app:create_app()'
+      "
+    networks:
+      - sales_network
+    depends_on:
+      - postgres
+
+  etl:
+    build: ./etl
+    image: etl
+    container_name: etl
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - ./etl/scripts:/etl
+      - ./data:/data
+    networks:
+      - sales_network
+    depends_on:
+      - postgres
+
+volumes:
+  postgres_data:
+
+networks:
+  sales_network:
