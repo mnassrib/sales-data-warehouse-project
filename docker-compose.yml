@@ -79,6 +79,7 @@ services:
 
 volumes:
   postgres_data:
+    name: sales_warehouse_data
 
 networks:
   sales_network:
