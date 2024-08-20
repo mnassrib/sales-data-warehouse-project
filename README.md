@@ -283,7 +283,9 @@ Les lacs de données sont particulièrement utiles pour le **big data**, l’int
 - **Entrepôts de données** : Apache Hive, Apache Druid, ClickHouse.
 - **Lacs de données** : Apache Hadoop, Apache Spark, Apache Hudi, Presto.
 
+
 Les solutions cloud comme Amazon S3, Google BigQuery, et Snowflake offrent généralement des essais gratuits ou des niveaux gratuits limités, mais deviennent payants au-delà d'un certain seuil d'utilisation. Les solutions open source sont généralement gratuites, mais nécessitent une infrastructure et une expertise technique pour être déployées et gérées efficacement.
+
 ---
 
 > N'hésitez pas à partager vos suggestions et à participer activement au développement de ce projet !
